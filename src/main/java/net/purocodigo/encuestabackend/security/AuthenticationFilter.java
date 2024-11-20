@@ -23,7 +23,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import net.purocodigo.encuestabackend.models.requests.UserLoginRequestModel;
 
-public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter{
+public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
 
@@ -32,13 +32,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter{
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException {
 
         try {
 
-            UserLoginRequestModel userModel = new ObjectMapper().readValue(request.getInputStream(), UserLoginRequestModel.class);
+            UserLoginRequestModel userModel = new ObjectMapper().readValue(request.getInputStream(),
+                    UserLoginRequestModel.class);
 
-            return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userModel.getEmail(), userModel.getPassword(), new ArrayList<>()));
+            return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userModel.getEmail(),
+                    userModel.getPassword(), new ArrayList<>()));
 
         } catch (IOException exception) {
             throw new RuntimeException(exception);
@@ -46,12 +49,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter{
     }
 
     @Override
-    public void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
+    public void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
+            Authentication authentication) throws IOException, ServletException {
         String email = ((User) authentication.getPrincipal()).getUsername();
+        String role = ((User) authentication.getPrincipal()).getAuthorities().toArray()[0].toString();
 
         String token = Jwts.builder()
-            .setSubject(email).setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_DATE))
-            .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret()).compact();
+                .setSubject(email)
+                .claim("role", role)
+                .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_DATE))
+                .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret()).compact();
 
         String data = new ObjectMapper().writeValueAsString(Map.of("token", SecurityConstants.TOKEN_PREFIX + token));
 
@@ -61,6 +68,4 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter{
         response.flushBuffer();
     }
 
-    
-    
 }

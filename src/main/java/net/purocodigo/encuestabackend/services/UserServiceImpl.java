@@ -3,6 +3,7 @@ package net.purocodigo.encuestabackend.services;
 import java.util.ArrayList;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,7 +33,9 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(user, userEntity);
 
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        
+
+        userEntity.setRole("USER");
+
         return userRepository.save(userEntity);
     }
 
@@ -44,12 +47,15 @@ public class UserServiceImpl implements UserService {
             throw new UsernameNotFoundException(email);
         }
 
-        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
+        String role = "ROLE_" + userEntity.getRole();
+
+        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
+                AuthorityUtils.commaSeparatedStringToAuthorityList(role));
     }
 
     @Override
-    public UserEntity getUser(String email) {        
+    public UserEntity getUser(String email) {
         return userRepository.findByEmail(email);
     }
-    
+
 }

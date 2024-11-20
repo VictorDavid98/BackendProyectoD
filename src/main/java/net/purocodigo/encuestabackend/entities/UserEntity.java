@@ -8,10 +8,10 @@ import javax.persistence.Id;
 
 import lombok.Data;
 
-@Entity(name="users")
+@Entity(name = "users")
 @Data
 public class UserEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -24,4 +24,7 @@ public class UserEntity {
 
     @Column(nullable = false)
     private String encryptedPassword;
+
+    @Column(nullable = false)
+    private String role;
 }
