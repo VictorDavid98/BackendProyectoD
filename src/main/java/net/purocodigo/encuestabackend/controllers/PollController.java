@@ -37,7 +37,7 @@ public class PollController {
     @Autowired
     PollService pollService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping
     public CreatedPollRest createPoll(@RequestBody @Valid PollCreationRequestModel model,
             Authentication authentication) {

@@ -9,7 +9,7 @@ import net.purocodigo.encuestabackend.annotations.UniqueEmail;
 
 @Data
 public class UserRegisterRequestModel {
-    
+
     @NotEmpty
     private String name;
 
@@ -19,7 +19,9 @@ public class UserRegisterRequestModel {
     private String email;
 
     @NotEmpty
-    @Size(min = 8, max= 40)
+    @Size(min = 8, max = 40)
     private String password;
+
+    private String role = "ROLE_USER";
 
 }

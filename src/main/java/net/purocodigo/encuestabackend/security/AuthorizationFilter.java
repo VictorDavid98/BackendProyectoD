@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -33,14 +34,6 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 
         UsernamePasswordAuthenticationToken authenticationToken = getAuthentication(request);
 
-        if (authenticationToken != null) {
-            String role = (String) authenticationToken.getAuthorities().toArray()[0];
-            if (role.equals("ROLE_ADMIN")) {
-
-            }
-
-        }
-
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         chain.doFilter(request, response);
@@ -55,9 +48,11 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 
             String subject = Jwts.parser().setSigningKey(SecurityConstants.getTokenSecret())
                     .parseClaimsJws(token).getBody().getSubject();
+            String role = Jwts.parser().setSigningKey(SecurityConstants.getTokenSecret())
+                    .parseClaimsJws(token).getBody().get("role", String.class);
 
-            if (subject != null) {
-                return new UsernamePasswordAuthenticationToken(subject, null, new ArrayList<>());
+            if (subject != null && role != null) {
+                return new UsernamePasswordAuthenticationToken(subject, null, AuthorityUtils.createAuthorityList(role));
             }
 
             return null;

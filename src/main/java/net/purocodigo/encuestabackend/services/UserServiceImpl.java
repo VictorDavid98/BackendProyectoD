@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
-        userEntity.setRole("USER");
+        userEntity.setRole("ROLE_USER");
 
         return userRepository.save(userEntity);
     }
@@ -47,10 +47,10 @@ public class UserServiceImpl implements UserService {
             throw new UsernameNotFoundException(email);
         }
 
-        String role = "ROLE_" + userEntity.getRole();
-
-        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
-                AuthorityUtils.commaSeparatedStringToAuthorityList(role));
+        return new User(
+                userEntity.getEmail(),
+                userEntity.getEncryptedPassword(),
+                AuthorityUtils.commaSeparatedStringToAuthorityList(userEntity.getRole()));
     }
 
     @Override
