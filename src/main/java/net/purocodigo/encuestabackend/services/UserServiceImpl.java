@@ -1,23 +1,29 @@
 package net.purocodigo.encuestabackend.services;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.User;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import net.purocodigo.encuestabackend.entities.RoleEntity;
 import net.purocodigo.encuestabackend.entities.UserEntity;
 import net.purocodigo.encuestabackend.models.requests.UserRegisterRequestModel;
+import net.purocodigo.encuestabackend.repositories.RoleRepository;
 import net.purocodigo.encuestabackend.repositories.UserRepository;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -29,12 +35,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity createUser(UserRegisterRequestModel user) {
         UserEntity userEntity = new UserEntity();
-
         BeanUtils.copyProperties(user, userEntity);
 
+        // Encriptar la contraseña
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
-        userEntity.setRole("ROLE_USER");
+        // Asignar rol por defecto
+        RoleEntity role = roleRepository.findByRoleName("ROLE_USER");
+        userEntity.setRole(role);
 
         return userRepository.save(userEntity);
     }
@@ -44,18 +52,36 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByEmail(email);
 
         if (userEntity == null) {
-            throw new UsernameNotFoundException(email);
+            throw new UsernameNotFoundException("Usuario no encontrado con email: " + email);
         }
 
-        return new User(
+        return new org.springframework.security.core.userdetails.User(
                 userEntity.getEmail(),
                 userEntity.getEncryptedPassword(),
-                AuthorityUtils.commaSeparatedStringToAuthorityList(userEntity.getRole()));
+                AuthorityUtils.createAuthorityList(userEntity.getRole().getRoleName()));
     }
 
     @Override
     public UserEntity getUser(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public UserEntity assignRoleToUser(String email, String roleName) {
+        UserEntity user = userRepository.findByEmail(email);
+        if (user != null) {
+            RoleEntity role = roleRepository.findByRoleName(roleName);
+            if (role != null) {
+                user.setRole(role);
+                return userRepository.save(user);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<UserEntity> getUsersWithRoleUser() {
+        return userRepository.findByRole_RoleName("ROLE_USER");
     }
 
 }
