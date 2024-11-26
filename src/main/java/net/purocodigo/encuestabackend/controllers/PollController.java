@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,14 +31,16 @@ import net.purocodigo.encuestabackend.services.PollService;
 import net.purocodigo.encuestabackend.utils.transformer.PollResultTransformer;
 
 @RestController
-@RequestMapping("/polls") // 
+@RequestMapping("/polls") //
 public class PollController {
 
     @Autowired
     PollService pollService;
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping
-    public CreatedPollRest createPoll(@RequestBody @Valid PollCreationRequestModel model , Authentication authentication) {
+    public CreatedPollRest createPoll(@RequestBody @Valid PollCreationRequestModel model,
+            Authentication authentication) {
         String pollId = pollService.createPoll(model, authentication.getPrincipal().toString());
         return new CreatedPollRest(pollId);
     }
@@ -53,10 +56,9 @@ public class PollController {
 
     @GetMapping
     public PaginatedPollRest getPolls(
-        @RequestParam(value="page", defaultValue = "0") int page, 
-        @RequestParam(value="limit", defaultValue = "10") int limit,  
-        Authentication authentication
-    ) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "limit", defaultValue = "10") int limit,
+            Authentication authentication) {
         Page<PollEntity> paginatedPolls = pollService.getPolls(page, limit, authentication.getPrincipal().toString());
 
         ModelMapper mapper = new ModelMapper();
@@ -66,8 +68,8 @@ public class PollController {
         PaginatedPollRest paginatedPollRest = new PaginatedPollRest();
 
         paginatedPollRest.setPolls(
-            paginatedPolls.getContent().stream().map(p -> mapper.map(p, PollRest.class)).collect(Collectors.toList())
-        );
+                paginatedPolls.getContent().stream().map(p -> mapper.map(p, PollRest.class))
+                        .collect(Collectors.toList()));
 
         paginatedPollRest.setTotalPages(paginatedPolls.getTotalPages());
         paginatedPollRest.setTotalRecords(paginatedPolls.getTotalElements());
@@ -78,12 +80,12 @@ public class PollController {
 
     }
 
-    @PatchMapping(path="/{id}")
+    @PatchMapping(path = "/{id}")
     public void togglePollOpened(@PathVariable String id, Authentication authentication) {
         pollService.togglePollOpened(id, authentication.getPrincipal().toString());
     }
 
-    @DeleteMapping(path="/{id}")
+    @DeleteMapping(path = "/{id}")
     public void deletePoll(@PathVariable String id, Authentication authentication) {
         pollService.deletePoll(id, authentication.getPrincipal().toString());
     }
@@ -94,10 +96,10 @@ public class PollController {
 
         PollEntity poll = pollService.getPoll(id);
 
-        PollResultTransformer transformer = new PollResultTransformer();        
+        PollResultTransformer transformer = new PollResultTransformer();
 
         return new PollResultWrapperRest(transformer.transformData(results), poll.getContent(), poll.getId());
-        
+
     }
 
 }

@@ -2,6 +2,7 @@ package net.purocodigo.encuestabackend.security;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -12,6 +13,7 @@ import net.purocodigo.encuestabackend.services.UserService;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
@@ -31,8 +33,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.authorizeRequests(requests -> requests
                 .antMatchers(HttpMethod.GET, "/").permitAll()
                 .antMatchers(HttpMethod.POST, "/users").permitAll()
-                .antMatchers(HttpMethod.GET, "/polls/**/questions").permitAll()
-                .antMatchers(HttpMethod.POST, "/polls/reply").permitAll()
+                .antMatchers(HttpMethod.GET, "/polls/**/questions").hasAnyRole("ADMIN")
+                .antMatchers(HttpMethod.POST, "/polls/reply").hasAnyRole("ADMIN")
                 .anyRequest().authenticated());
 
         http.addFilter(getAuthenticationFilter())
