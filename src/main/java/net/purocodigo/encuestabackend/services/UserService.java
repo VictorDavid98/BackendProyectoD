@@ -20,4 +20,8 @@ public interface UserService extends UserDetailsService {
 
     public List<UserEntity> getUsersWithRoleUser();
 
+    public List<UserEntity> getProfesionalWithRoleUser();
+
+    UserEntity assignProfessionalToUser(Long userId, Long professionalId);
+
 }

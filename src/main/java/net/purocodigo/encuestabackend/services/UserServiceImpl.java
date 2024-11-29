@@ -84,4 +84,32 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByRole_RoleName("ROLE_USER");
     }
 
+    @Override
+    public List<UserEntity> getProfesionalWithRoleUser() {
+        return userRepository.findByRole_RoleName("ROLE_PROFESIONAL");
+    }
+
+    @Override
+    public UserEntity assignProfessionalToUser(Long userId, Long professionalId) {
+        // Buscar al usuario y al profesional
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+        UserEntity professional = userRepository.findById(professionalId)
+                .orElseThrow(() -> new RuntimeException("Profesional no encontrado."));
+
+        // Validar que los roles sean los correctos
+        if (!"ROLE_PROFESIONAL".equals(professional.getRole().getRoleName())) {
+            throw new RuntimeException("El usuario seleccionado no tiene el rol ROLE_PROFESIONAL.");
+        }
+        if (!"ROLE_USER".equals(user.getRole().getRoleName())) {
+            throw new RuntimeException("El usuario seleccionado no tiene el rol ROLE_USER.");
+        }
+
+        // Asignar profesional al usuario
+        user.setAssignedProfessional(professional);
+
+        // Guardar cambios
+        return userRepository.save(user);
+    }
+
 }
