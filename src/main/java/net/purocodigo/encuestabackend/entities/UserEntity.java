@@ -14,6 +14,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.Data;
 
 @Entity(name = "users")
@@ -38,7 +42,10 @@ public class UserEntity {
     private RoleEntity role;
 
     @ManyToOne
-    @JoinColumn(name = "assigned_professional_id")
+    @JoinColumn(name = "professional_id")
     private UserEntity assignedProfessional;
+
+    @OneToMany(mappedBy = "assignedProfessional", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserEntity> assignedUsers = new ArrayList<>();
 
 }

@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import net.purocodigo.encuestabackend.Dto.ProfesionalDTO;
+import net.purocodigo.encuestabackend.Dto.UserDTO;
 import net.purocodigo.encuestabackend.entities.UserEntity;
 import net.purocodigo.encuestabackend.models.requests.UserRegisterRequestModel;
 
@@ -18,9 +20,11 @@ public interface UserService extends UserDetailsService {
 
     UserEntity assignRoleToUser(String email, String roleName);
 
-    public List<UserEntity> getUsersWithRoleUser();
+    public List<UserDTO> getUsersWithRoleUser();
 
-    public List<UserEntity> getProfesionalWithRoleUser();
+    public List<ProfesionalDTO> getProfesionalWithRoleUser();
+
+    public List<UserDTO> getUserProfesionales();
 
     UserEntity assignProfessionalToUser(Long userId, Long professionalId);
 

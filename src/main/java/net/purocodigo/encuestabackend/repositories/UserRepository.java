@@ -14,5 +14,7 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
     List<UserEntity> findByRole_RoleName(String roleName);
 
+    List<UserEntity> findByRole_RoleNameIn(List<String> roles);
+
     List<UserEntity> findByAssignedProfessional(UserEntity professional);
 }
