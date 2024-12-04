@@ -98,6 +98,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserEntity getUserById(long id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
     public UserEntity assignRoleToUser(String email, String roleName) {
         UserEntity user = userRepository.findByEmail(email);
         if (user != null) {

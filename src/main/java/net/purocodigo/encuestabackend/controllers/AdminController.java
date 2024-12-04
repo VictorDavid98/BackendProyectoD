@@ -14,6 +14,7 @@ import net.purocodigo.encuestabackend.repositories.UserRepository;
 import net.purocodigo.encuestabackend.services.UserService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class AdminController {
@@ -57,13 +58,21 @@ public class AdminController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/admin/profesional/{id}/users")
-    public List<UserEntity> getUsersByProfessional(@PathVariable Long id) {
-        UserEntity professional = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Profesional no encontrado."));
+    @GetMapping("/admin/professionals/{id}/assigned-users")
+    public ResponseEntity<List<UserDTO>> getAssignedUsers(@PathVariable long id) {
+        UserEntity professional = userService.getUserById(id);
+
         if (!"ROLE_PROFESIONAL".equals(professional.getRole().getRoleName())) {
-            throw new RuntimeException("El usuario no tiene el rol ROLE_PROFESIONAL.");
+            return ResponseEntity.badRequest().build();
         }
-        return professional.getAssignedUsers();
+
+        List<UserEntity> assignedUsers = professional.getAssignedUsers();
+        List<UserDTO> userDTOs = assignedUsers.stream()
+                .map(user -> new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole().getRoleName(),
+                        null))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(userDTOs);
     }
+
 }

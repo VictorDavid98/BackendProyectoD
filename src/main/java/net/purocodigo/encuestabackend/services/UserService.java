@@ -16,6 +16,8 @@ public interface UserService extends UserDetailsService {
 
     public UserEntity getUser(String email);
 
+    public UserEntity getUserById(long id);
+
     public UserEntity createUser(UserRegisterRequestModel user);
 
     UserEntity assignRoleToUser(String email, String roleName);
